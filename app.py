@@ -1,4 +1,4 @@
-import streatmlit as st
+import streamlit as st
 
 st.set_page_config(page_title = 'Support Ticket System')
 st.title('Welcome to Support Ticket System')
