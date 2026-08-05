@@ -2,7 +2,7 @@ command:
   - streamlit
   - run
   - app.py
-  env:
+env:
   - name: LAKEBASE_SECRET_SCOPE
     value: "database"
   - name: LAKEBASE_SECRET_KEY
