@@ -1,5 +1,4 @@
 import streamlit as st
-
 from lakebase import run_query
 import os
 from databricks.sdk import WorkspaceClient
