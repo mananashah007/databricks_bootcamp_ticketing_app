@@ -11,7 +11,6 @@ class Database:
         port = os.environ["PGPORT"]
         database = os.environ["PGDATABASE"]
         user = os.environ["PGUSER"]
-        password = os.environ["PGPASSWORD"]
 
         connection_string = (
             f"postgresql+psycopg://{user}:{password}"
