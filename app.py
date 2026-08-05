@@ -6,6 +6,11 @@ from databricks.sdk import WorkspaceClient
 
 _w = WorkspaceClient()
 
+tickets_table = os.environ.get("tickets","tickets")
+ticket_messages_table = os.environ.get("ticket_messages","ticket_messages")
+
+
+
 st.set_page_config(
     page_title="Support Ticket System",
     page_icon="🎫",
@@ -19,14 +24,14 @@ st.caption("Lakebase powered support ticket application")
 # Load tickets
 # ----------------------------------------------------
 try:
-    tickets = run_query("""
+    tickets = run_query(f"""
         SELECT
             ticket_id,
             title,
             status,
             created_by,
             created_at
-        FROM tickets
+        FROM {tickets_table}
         ORDER BY created_at DESC;
     """)
 except Exception as e:
@@ -81,12 +86,12 @@ st.divider()
 # Messages
 # ----------------------------------------------------
 
-messages = run_query("""
+messages = run_query(f"""
     SELECT
         author,
         message_text,
         created_at
-    FROM ticket_messages
+    FROM {ticket_messages_table}
     WHERE ticket_id=%s
     ORDER BY created_at;
 """, (ticket_id,))
