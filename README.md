@@ -1,46 +1,46 @@
-# databricks_bootcamp_ticketing_app
 # 🎫 Lakebase Support Ticket System
 
-A simple internal support ticket application built using **Databricks Apps**, **Streamlit**, and **Lakebase (Databricks-managed PostgreSQL)**.
+A simple internal support ticket management application built using **Databricks Apps**, **Streamlit**, and **Lakebase (Databricks-managed PostgreSQL)**.
 
-This project was developed as part of the Databricks Lakebase Bootcamp to demonstrate how transactional application data can be stored and managed using Lakebase while building an interactive web application.
-
----
-
-## Features
-
-- View all support tickets
-- View messages for a selected ticket
-- Create new support tickets
-- Add messages to existing tickets
-- Update ticket status
-- Store all operational data in Lakebase
-- Secure database connection using Databricks Secret Scopes
+This project was developed as part of the **Databricks Lakebase Bootcamp** to demonstrate how operational applications can leverage Lakebase as a transactional database while being deployed entirely within the Databricks ecosystem.
 
 ---
 
-## Technology Stack
+## 🚀 Features
+
+- 📋 View all support tickets
+- 🔍 Select a ticket and view its conversation history
+- ➕ Create new support tickets
+- 💬 Add messages to existing tickets
+- 🔄 Update ticket status (Open, In Progress, Resolved)
+- 💾 Store all operational data in Lakebase
+- 🔐 Secure database connection using Databricks Secret Scopes
+
+---
+
+## 🛠️ Technology Stack
 
 | Component | Technology |
-|----------|------------|
+|-----------|------------|
 | Frontend | Streamlit |
 | Backend | Python |
 | Database | Lakebase (Databricks PostgreSQL) |
 | Database Driver | psycopg2 |
-| ORM / SQL Engine | SQLAlchemy |
+| SQL Engine | SQLAlchemy |
 | Deployment | Databricks Apps |
-| Secret Management | Databricks Secret Scope |
-| Version Control | GitHub |
+| Secret Management | Databricks Secret Scopes |
+| Version Control | Git & GitHub |
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 databricks-ticketing-app/
 │
 ├── app.py                # Streamlit application
-├── lakebase.py           # Database connection and helper functions
+├── services.py           # Business logic and CRUD operations
+├── lakebase.py           # Database connection and query helpers
 ├── app.yml               # Databricks App configuration
 ├── requirements.txt      # Python dependencies
 ├── README.md
@@ -56,71 +56,79 @@ databricks-ticketing-app/
 | Column | Description |
 |---------|-------------|
 | ticket_id | Primary Key |
-| title | Ticket title |
-| status | Current ticket status |
-| created_by | Ticket creator |
-| created_at | Creation timestamp |
+| title | Support ticket title |
+| status | Ticket status (open, in_progress, resolved) |
+| created_by | User who created the ticket |
+| created_at | Timestamp when the ticket was created |
+
+---
 
 ### ticket_messages
 
 | Column | Description |
 |---------|-------------|
 | message_id | Primary Key |
-| ticket_id | Foreign key to tickets |
-| message_text | Support message |
-| author | Message author |
-| created_at | Message timestamp |
+| ticket_id | Foreign Key referencing `tickets.ticket_id` |
+| message_text | Message content |
+| author | Author of the message |
+| created_at | Timestamp when the message was added |
 
 ---
 
-## Database Connection
+## 🔐 Database Connection
 
-The application connects securely to Lakebase using a Databricks Secret Scope.
+The application securely connects to Lakebase using a **Databricks Secret Scope**.
 
-The Lakebase PostgreSQL connection URL is stored as a secret and retrieved at runtime, ensuring that credentials are never stored in the source code.
+The PostgreSQL connection URL is stored as a secret and retrieved securely at runtime. No credentials are stored in the source code or committed to the repository.
 
 ---
 
 ## ▶️ Running the Application
 
-Install dependencies:
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the Streamlit application:
+### Start the Streamlit application
 
 ```bash
 streamlit run app.py
 ```
 
-For deployment, the application is configured using Databricks Apps through the `app.yml` configuration file.
+For deployment, the application is configured using **Databricks Apps** through the `app.yml` configuration file.
 
 ---
 
-## 📸 Screenshots
+## 📸 Application Preview
 
-### Application
+### Support Ticket Dashboard
 
-![image_1785938672479.png](./image_1785938672479.png "image_1785938672479.png")
+![image_1785940577872.png](./image_1785940577872.png "image_1785940577872.png")
+
+---
 
 ### Lakebase Tables
-![image_1785938690086.png](./image_1785938690086.png "image_1785938690086.png")
 
+![image_1785940599985.png](./image_1785940599985.png "image_1785940599985.png")
 
 ---
 
-## Future Improvements
+## 🎯 Future Enhancements
+
+Some additional features that could be added include:
 
 - Ticket priority (High, Medium, Low)
 - Ticket categories
-- Search and filtering
+- Search and filtering by status
 - Dashboard with ticket statistics
-- Delete tickets with confirmation
-- User authentication
-- AI-powered ticket summarization and response suggestions
+- Delete ticket functionality with confirmation
+- User authentication and authorization
+- File attachments for support tickets
+- AI-powered ticket summarization and response suggestions using Databricks AI
 
+---
 
 ## 👤 Author
 
