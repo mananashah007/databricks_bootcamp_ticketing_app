@@ -9,8 +9,6 @@ _w = WorkspaceClient()
 tickets_table = os.environ.get("tickets","tickets")
 ticket_messages_table = os.environ.get("ticket_messages","ticket_messages")
 
-
-
 st.set_page_config(
     page_title="Support Ticket System",
     page_icon="🎫",
