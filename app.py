@@ -1,6 +1,10 @@
 import streamlit as st
 
-from database import run_query
+from lakebase import run_query
+import os
+from databricks.sdk import WorkspaceClient
+
+_w = WorkspaceClient()
 
 st.set_page_config(
     page_title="Support Ticket System",
