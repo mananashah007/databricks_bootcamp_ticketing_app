@@ -1,53 +1,83 @@
 import streamlit as st
-from lakebase import run_query
 import os
 from databricks.sdk import WorkspaceClient
 
-_w = WorkspaceClient()
+from services import (
+    get_all_tickets,
+    get_ticket_messages,
+    create_ticket,
+    add_message,
+    update_ticket_status
+)
 
-tickets_table = os.environ.get("tickets","tickets")
-ticket_messages_table = os.environ.get("ticket_messages","ticket_messages")
+# ----------------------------------------------------
+# Page Config
+# ----------------------------------------------------
 
 st.set_page_config(
     page_title="Support Ticket System",
     page_icon="🎫",
-    layout="wide",
+    layout="wide"
 )
 
 st.title("🎫 Support Ticket System")
-st.caption("Lakebase powered support ticket application")
+st.caption("Powered by Databricks Apps + Lakebase")
 
 # ----------------------------------------------------
-# Load tickets
+# Load Tickets
 # ----------------------------------------------------
+
 try:
-    tickets = run_query(f"""
-        SELECT
-            ticket_id,
-            title,
-            status,
-            created_by,
-            created_at
-        FROM {tickets_table}
-        ORDER BY created_at DESC;
-    """)
+    tickets = get_all_tickets()
+
 except Exception as e:
-    st.error(f"Unable to connect to Lakebase.\n\n{e}")
+    st.error(f"Unable to load tickets.\n\n{e}")
     st.stop()
 
 # ----------------------------------------------------
-# Sidebar
+# SIDEBAR
 # ----------------------------------------------------
 
-st.sidebar.header("Tickets")
+st.sidebar.title("🎫 Support Tickets")
+
+# ---------- Create Ticket ----------
+
+st.sidebar.markdown("## ➕ Create Ticket")
+
+with st.sidebar.form("create_ticket_form"):
+
+    new_title = st.text_input("Title")
+
+    new_creator = st.text_input("Created By")
+
+    submitted = st.form_submit_button("Create Ticket")
+
+    if submitted:
+
+        if not new_title or not new_creator:
+            st.sidebar.error("Please fill all fields.")
+
+        else:
+
+            create_ticket(new_title, new_creator)
+
+            st.sidebar.success("Ticket Created!")
+
+            st.rerun()
+
+st.sidebar.divider()
+
+# ---------- Ticket Selection ----------
 
 if not tickets:
-    st.warning("No tickets found.")
+
+    st.warning("No tickets available.")
+
     st.stop()
 
 ticket_lookup = {
-    f"#{t['ticket_id']} - {t['title']}": t["ticket_id"]
-    for t in tickets
+    f"#{ticket['ticket_id']} - {ticket['title']}": ticket["ticket_id"]
+    for ticket in tickets
 }
 
 selected_ticket = st.sidebar.selectbox(
@@ -57,50 +87,115 @@ selected_ticket = st.sidebar.selectbox(
 
 ticket_id = ticket_lookup[selected_ticket]
 
-# ----------------------------------------------------
-# Ticket Details
-# ----------------------------------------------------
-
 ticket = next(
     t for t in tickets
     if t["ticket_id"] == ticket_id
 )
 
+# ----------------------------------------------------
+# MAIN PAGE
+# ----------------------------------------------------
+
 col1, col2 = st.columns([4,1])
 
 with col1:
+
     st.subheader(ticket["title"])
 
-with col2:
-    st.metric("Status", ticket["status"])
+    st.write(f"**Created By:** {ticket['created_by']}")
 
-st.write(f"**Created By:** {ticket['created_by']}")
-st.write(f"**Created At:** {ticket['created_at']}")
+    st.write(f"**Created At:** {ticket['created_at']}")
+
+with col2:
+
+    st.metric("Status", ticket["status"])
 
 st.divider()
 
 # ----------------------------------------------------
-# Messages
+# Conversation
 # ----------------------------------------------------
 
-messages = run_query(f"""
-    SELECT
-        author,
-        message_text,
-        created_at
-    FROM {ticket_messages_table}
-    WHERE ticket_id=%s
-    ORDER BY created_at;
-""", (ticket_id,))
+messages = get_ticket_messages(ticket_id)
 
-st.subheader("Conversation")
+st.subheader("💬 Conversation")
 
-for message in messages:
+if not messages:
 
-    with st.container(border=True):
+    st.info("No messages available.")
 
-        st.write(f"**{message['author']}**")
+else:
 
-        st.write(message["message_text"])
+    for message in messages:
 
-        st.caption(message["created_at"])
+        with st.container(border=True):
+
+            st.write(f"**{message['author']}**")
+
+            st.write(message["message_text"])
+
+            st.caption(message["created_at"])
+
+# ----------------------------------------------------
+# Add Message
+# ----------------------------------------------------
+
+st.divider()
+
+st.subheader("➕ Add Message")
+
+with st.form("add_message_form"):
+
+    author = st.text_input("Author")
+
+    message = st.text_area("Message")
+
+    submit_message = st.form_submit_button("Add Message")
+
+    if submit_message:
+
+        if not author or not message:
+
+            st.error("Please complete all fields.")
+
+        else:
+
+            add_message(ticket_id, message, author)
+
+            st.success("Message Added!")
+
+            st.rerun()
+
+# ----------------------------------------------------
+# Update Status
+# ----------------------------------------------------
+
+st.divider()
+
+st.subheader("🔄 Update Ticket Status")
+
+status_options = [
+    "open",
+    "in_progress",
+    "resolved"
+]
+
+current_status_index = status_options.index(ticket["status"])
+
+with st.form("status_form"):
+
+    new_status = st.selectbox(
+        "Status",
+        status_options,
+        index=current_status_index
+    )
+
+    submit_status = st.form_submit_button("Update Status")
+
+    if submit_status:
+
+        update_ticket_status(ticket_id, new_status)
+
+        st.success("Status Updated!")
+
+        st.rerun()
